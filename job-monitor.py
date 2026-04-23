@@ -8,6 +8,7 @@ from email.mime.text import MIMEText
 from datetime import datetime
 from hashlib import sha256
 from dotenv import load_dotenv
+from datetime import datetime, timezone, timedelta
 
 load_dotenv()
 
@@ -44,6 +45,20 @@ def mark_seen(conn, job_id):
                  (job_id, datetime.utcnow().isoformat()))
     conn.commit()
 
+MAX_AGE_MINUTES = 70
+
+def is_recent(job):
+    """Return True if the job was posted within MAX_AGE_MINUTES."""
+    if not job.get("updated_at"):
+        return False  # no timestamp → skip to be safe
+    try:
+        posted = datetime.fromisoformat(job["updated_at"].replace("Z", "+00:00"))
+        age = datetime.now(timezone.utc) - posted
+        return age < timedelta(minutes=MAX_AGE_MINUTES)
+    except Exception as e:
+        print(f"Could not parse timestamp {job['updated_at']}: {e}")
+        return False
+
 # ---------- FETCHERS ----------
 def fetch_greenhouse(company):
     url = f"https://boards-api.greenhouse.io/v1/boards/{company}/jobs"
@@ -57,6 +72,7 @@ def fetch_greenhouse(company):
                 "location": j.get("location", {}).get("name", ""),
                 "url": j["absolute_url"],
                 "description": j.get("content", ""),
+                "updated_at": j.get("updated_at"),  # ISO format string
             }
     except Exception as e:
         print(f"Greenhouse {company} failed: {e}")
@@ -65,7 +81,17 @@ def fetch_lever(company):
     url = f"https://api.lever.co/v0/postings/{company}"
     try:
         r = requests.get(url, timeout=10)
-        for j in r.json():
+        data = r.json()
+        if not isinstance(data, list):
+            print(f"Lever {company}: unexpected response format")
+            return
+        for j in data:
+            created_ms = j.get("createdAt")
+            updated_iso = None
+            if created_ms:
+                updated_iso = datetime.fromtimestamp(
+                    created_ms / 1000, tz=timezone.utc
+                ).isoformat()
             yield {
                 "id": f"lever-{company}-{j['id']}",
                 "title": j["text"],
@@ -73,6 +99,7 @@ def fetch_lever(company):
                 "location": j.get("categories", {}).get("location", ""),
                 "url": j["hostedUrl"],
                 "description": j.get("descriptionPlain", ""),
+                "updated_at": updated_iso,
             }
     except Exception as e:
         print(f"Lever {company} failed: {e}")
@@ -80,6 +107,11 @@ def fetch_lever(company):
 def fetch_rss(url):
     feed = feedparser.parse(url)
     for entry in feed.entries:
+        updated_iso = None
+        if hasattr(entry, "published_parsed") and entry.published_parsed:
+            updated_iso = datetime(
+                *entry.published_parsed[:6], tzinfo=timezone.utc
+            ).isoformat()
         yield {
             "id": f"rss-{sha256(entry.link.encode()).hexdigest()[:16]}",
             "title": entry.title,
@@ -87,6 +119,7 @@ def fetch_rss(url):
             "location": "",
             "url": entry.link,
             "description": entry.get("summary", ""),
+            "updated_at": updated_iso,
         }
 
 # ---------- FILTER ----------
@@ -154,7 +187,6 @@ def send_push(jobs):
 
 # ---------- MAIN ----------
 def run():
-    conn = init_db()
     new_matches = []
 
     sources = (
@@ -165,11 +197,10 @@ def run():
 
     for source in sources:
         for job in source:
-            if is_new(conn, job["id"]) and matches(job):
+            if is_recent(job) and matches(job):
                 new_matches.append(job)
-            mark_seen(conn, job["id"])
 
-    print(f"Found {len(new_matches)} new matches")
+    print(f"Found {len(new_matches)} new matches in the last {MAX_AGE_MINUTES} minutes")
     if new_matches:
         send_email(new_matches)
         send_push(new_matches)
