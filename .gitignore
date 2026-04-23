@@ -18,3 +18,4 @@ __pycache__/
 
 *.log
 bulk-job-monitor.py
+verify-companies.py
