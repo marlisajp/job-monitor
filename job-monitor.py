@@ -18,7 +18,7 @@ KEYWORDS_BLOCKED  = ["senior", "principal", "manager", "staff"]
 LOCATIONS_OK      = ["remote", "new york", "nyc", "ny"]
 MAX_YEARS_REQUIRED         = 4    
 
-GREENHOUSE_COMPANIES = ["spacex", "databricks", "stripe", "cloudflare", "anthropic", "mongodb", "datadog", "samsara", "oscar", "airbnb", "brex", "gitlab", "elastic", "pinterest", "figma", "affirm", "robinhood", "reddit", "asana", "instacart", "coinbase", "dropbox", "duolingo", "discord", "gusto", "chime", "vercel", "faire", "mercury", "twitch", "checkr", "carta", "fastly", "newrelic", "airtable", "pagerduty", "mixpanel", "launchdarkly", "thumbtack", "amplitude", "squarespace", "nextdoor", "alloy", "pendo", "circleci", "consensys", "modernhealth", "clever", "medium", "kickstarter"]
+GREENHOUSE_COMPANIES = ["spacex", "databricks", "stripe", "cloudflare", "anthropic", "mongodb", "datadog", "samsara", "oscar", "airbnb", "brex", "gitlab", "elastic", "pinterest", "figma", "affirm", "robinhood", "reddit", "asana", "instacart", "coinbase", "dropbox", "duolingo", "discord", "gusto", "chime", "vercel", "faire", "mercury", "twitch", "checkr", "carta", "fastly", "newrelic", "airtable", "pagerduty", "mixpanel", "launchdarkly", "thumbtack", "amplitude", "squarespace", "nextdoor", "alloy", "pendo", "circleci", "consensys", "modernhealth", "clever", "medium", "kickstarter", "harrys", "mammothbrands"]
 
 LEVER_COMPANIES      = ["netflix", "ramp"]
 RSS_FEEDS = [
