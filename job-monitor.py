@@ -13,10 +13,10 @@ from datetime import datetime, timezone, timedelta
 load_dotenv()
 
 # ---------- CONFIG ----------
-KEYWORDS_REQUIRED = ["typescript", "javascript", "react", "frontend", "backend", "full stack", "software engineer", "engineer", "developer", "product engineer"]  
-KEYWORDS_BLOCKED  = ["senior", "principal", "manager", "staff"] 
+KEYWORDS_REQUIRED = ["typescript", "javascript", "react", "frontend", "backend", "full stack", "software engineer", "full stack developer", "full stack software engineer", "product engineer"]  
+KEYWORDS_BLOCKED  = ["senior", "principal", "manager", "staff", "sr.", "director", "lead", "head"] 
 LOCATIONS_OK      = ["remote", "new york", "nyc", "ny"]
-MAX_YEARS_REQUIRED         = 4    
+MAX_YEARS_REQUIRED         = 4     
 
 GREENHOUSE_COMPANIES = ["spacex", "databricks", "stripe", "cloudflare", "anthropic", "mongodb", "datadog", "samsara", "oscar", "airbnb", "brex", "gitlab", "elastic", "pinterest", "figma", "affirm", "robinhood", "reddit", "asana", "instacart", "coinbase", "dropbox", "duolingo", "discord", "gusto", "chime", "vercel", "faire", "mercury", "twitch", "checkr", "carta", "fastly", "newrelic", "airtable", "pagerduty", "mixpanel", "launchdarkly", "thumbtack", "amplitude", "squarespace", "nextdoor", "alloy", "pendo", "circleci", "consensys", "modernhealth", "clever", "medium", "kickstarter", "harrys", "mammothbrands"]
 
