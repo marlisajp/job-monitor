@@ -187,6 +187,7 @@ def send_push(jobs):
 
 # ---------- MAIN ----------
 def run():
+    conn = init_db()
     new_matches = []
 
     sources = (
@@ -197,8 +198,9 @@ def run():
 
     for source in sources:
         for job in source:
-            if is_recent(job) and matches(job):
+            if is_new(conn, job["id"]) and is_recent(job) and matches(job):
                 new_matches.append(job)
+            mark_seen(conn, job["id"])
 
     print(f"Found {len(new_matches)} new matches in the last {MAX_AGE_MINUTES} minutes")
     if new_matches:
