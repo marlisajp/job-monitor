@@ -13,14 +13,57 @@ from datetime import datetime, timezone, timedelta
 load_dotenv()
 
 # ---------- CONFIG ----------
-KEYWORDS_REQUIRED = ["typescript", "javascript", "react", "frontend", "backend", "full stack", "software engineer", "full stack developer", "full stack software engineer", "product engineer"]  
-KEYWORDS_BLOCKED  = ["senior", "principal", "manager", "staff", "sr.", "director", "lead", "head"] 
+KEYWORDS_REQUIRED = ["typescript", "javascript", "react", "frontend", "backend", "full stack", "software engineer", "full stack developer", "full stack software engineer", "product engineer", "entry", "software engineer I", "software engineer II", "software engineer 2", "software engineer 1", "senior software engineer", "senior engineer" ]  
+KEYWORDS_BLOCKED  = ["principal", "manager", "staff", "director", "lead", "head", "C++", "iOS"] 
 LOCATIONS_OK      = ["remote", "new york", "nyc", "ny"]
-MAX_YEARS_REQUIRED         = 4     
+MAX_YEARS_REQUIRED         = 4;    
 
-GREENHOUSE_COMPANIES = ["spacex", "databricks", "stripe", "cloudflare", "anthropic", "mongodb", "datadog", "samsara", "oscar", "airbnb", "brex", "gitlab", "elastic", "pinterest", "figma", "affirm", "robinhood", "reddit", "asana", "instacart", "coinbase", "dropbox", "duolingo", "discord", "gusto", "chime", "vercel", "faire", "mercury", "twitch", "checkr", "carta", "fastly", "newrelic", "airtable", "pagerduty", "mixpanel", "launchdarkly", "thumbtack", "amplitude", "squarespace", "nextdoor", "alloy", "pendo", "circleci", "consensys", "modernhealth", "clever", "medium", "kickstarter", "harrys", "mammothbrands"]
+GREENHOUSE_COMPANIES = [
+    # your existing list (removed thumbtack and amplitude, which return 404)
+    "spacex", "databricks", "stripe", "cloudflare", "anthropic", "mongodb", "datadog", "samsara", "oscar", "airbnb",
+    "brex", "gitlab", "elastic", "pinterest", "figma", "affirm", "robinhood", "reddit", "asana", "instacart",
+    "coinbase", "dropbox", "duolingo", "discord", "gusto", "chime", "vercel", "faire", "mercury", "twitch",
+    "checkr", "carta", "fastly", "newrelic", "airtable", "pagerduty", "mixpanel", "launchdarkly", "squarespace", "nextdoor",
+    "alloy", "pendo", "circleci", "consensys", "modernhealth", "clever", "medium", "kickstarter", "harrys", "mammothbrands",
 
-LEVER_COMPANIES      = ["netflix", "ramp"]
+    # big tech / consumer
+    "doordashusa", "lyft", "roblox", "tripadvisor", "hubspotjobs", "twilio", "okta", "zscaler", "toast", "block",
+    "epicgames", "riotgames", "scopely", "peloton", "seatgeek", "stockx", "oura", "intercom", "smartsheet", "zoominfo",
+    "appian", "lucidsoftware", "wrike", "coursera", "calendly", "yext", "braze", "klaviyo", "attentive", "postscript",
+    "yotpo", "hellofresh", "thrivemarket", "misfitsmarket", "weee", "renttherunway", "sweetgreen",
+
+    # AI / ML / infra
+    "xai", "scaleai", "togetherai", "inflectionai", "stabilityai", "coreweave", "snorkelai", "labelbox", "dataiku", "c3iot",
+    "typeface", "descript", "grafanalabs", "cribl", "honeycomb", "sumologic", "fivetran", "sigmacomputing", "starburst", "dremio",
+    "singlestore", "cockroachlabs", "yugabyte", "planetscale", "neo4j", "algolia", "contentful", "storyblok", "netlify", "buildkite",
+    "jfrog", "tailscale", "bitwarden", "backblaze", "wasabi", "purestorage", "rubrik", "druva", "tanium", "wizinc",
+    "abnormalsecurity", "sendbird", "bandwidth", "vonage", "dialpad",
+
+    # hardware / robotics / autonomy / aerospace
+    "andurilindustries", "waymo", "nuro", "kodiak", "lucidmotors", "rocketlab", "astranis", "planetlabs", "verkada", "axon",
+    "figureai", "apptronik", "agilityrobotics", "flexport", "project44",
+
+    # fintech / crypto
+    "sofi", "upstart", "sezzle", "blend", "betterment", "stashinvest", "step", "current", "monzo", "n26",
+    "adyen", "payoneer", "billcom", "lithic", "highnote", "treasuryprime", "alpaca", "drivewealth", "tastytrade", "public",
+    "gemini", "ripple", "fireblocks", "bitgo",
+
+    # quant / trading
+    "janestreet", "jumptrading", "imc", "towerresearchcapital", "point72", "schonfeld", "worldquant", "akunacapital", "flowtraders", "chicagotrading",
+    "virtu", "pdtpartners", "vaticlabs", "aqr", "mangroup",
+
+    # health / HR / other SaaS
+    "zocdoc", "flatironhealth", "komodohealth", "doximity", "talkspace", "swordhealth", "healthie", "garnerhealth", "justworks", "lattice",
+    "cultureamp", "greenhouse", "tripactions", "relativity",
+]
+
+LEVER_COMPANIES = [
+    "palantir", "spotify", "zoox", "veeva", "sonarsource", "coupa", "jumpcloud", "sysdig", "filevine", "olo",
+    "wealthfront", "crypto", "binance", "anchorage", "offchainlabs", "safe", "1inch", "zerion", "immutable", "greenlight",
+    "ro", "rover", "outreach", "gopuff", "alltrails", "zilliz", "truv", "secureframe", "twingate", "bazaarvoice",
+    "brilliant", "educative", "emburse", "pattern", "cin7", "elroyair", "merlinlabs", "tala", "rigetti", "atomcomputing",
+    "lucidworks", "hive", "zeta", "nium", "deputy", "theathletic", "traackr", "wattpad",
+]
 RSS_FEEDS = [
     "https://remoteok.com/remote-dev-jobs.rss",
     "https://weworkremotely.com/categories/remote-programming-jobs.rss",
@@ -45,7 +88,8 @@ def mark_seen(conn, job_id):
                  (job_id, datetime.utcnow().isoformat()))
     conn.commit()
 
-MAX_AGE_MINUTES = 70
+MAX_AGE_MINUTES = 170
+# MAX_AGE_MINUTES = 1440
 
 def is_recent(job):
     """Return True if the job was posted within MAX_AGE_MINUTES."""
