@@ -64,6 +64,34 @@ LEVER_COMPANIES = [
     "brilliant", "educative", "emburse", "pattern", "cin7", "elroyair", "merlinlabs", "tala", "rigetti", "atomcomputing",
     "lucidworks", "hive", "zeta", "nium", "deputy", "theathletic", "traackr", "wattpad",
 ]
+
+ASHBY_COMPANIES = [
+    # AI labs / AI products
+    "openai", "perplexity", "cohere", "elevenlabs", "harvey", "sierra", "decagon", "cognition", "cursor", "lovable",
+    "replit", "suno", "pika", "character", "writer", "gamma", "granola", "langchain", "llamaindex", "braintrust",
+    "physicalintelligence", "chaidiscovery", "openevidence", "abridge", "commure", "notable", "nabla", "freed", "infinitus", "insitro",
+
+    # dev tools / infra / data
+    "linear", "notion", "supabase", "posthog", "sentry", "snyk", "vanta", "drata", "1password", "clickhouse",
+    "snowflake", "temporal", "render", "railway", "modal", "baseten", "anyscale", "lambda", "crusoe", "cerebras",
+    "fireworks", "pinecone", "weaviate", "hex", "deepnote", "airbyte", "hightouch", "workos", "merge", "zed",
+    "tldraw", "webflow", "miro", "zapier", "n8n", "attio", "apollo",
+
+    # fintech
+    "ramp", "plaid", "column", "moderntreasury", "rho", "meow", "novo", "method", "middesk", "persona",
+    "socure", "sardine", "numeric", "campfire", "rillet", "mosaic", "lemonade", "kin", "bestow", "phantom",
+    "neon", "boom",
+
+    # health
+    "headway", "rula", "talkiatry", "alma", "maven", "superpower", "whoop", "eightsleep", "benchling", "generate",
+    "lunar", "finch",
+
+    # hardware / robotics / defense / energy
+    "applied", "wayve", "skydio", "shield", "saronic", "1x", "standardbots", "helion", "antares", "formenergy",
+    "radiant", "span", "texture", "enode", "watershed", "orbital", "tekion", "ravenna", "leap", "sweep",
+    "causal", "warp", "runway",
+]
+
 RSS_FEEDS = [
     "https://remoteok.com/remote-dev-jobs.rss",
     "https://weworkremotely.com/categories/remote-programming-jobs.rss",
@@ -147,6 +175,33 @@ def fetch_lever(company):
             }
     except Exception as e:
         print(f"Lever {company} failed: {e}")
+
+def fetch_ashby(company):
+    url = f"https://api.ashbyhq.com/posting-api/job-board/{company}"
+    try:
+        r = requests.get(url, timeout=10)
+        r.raise_for_status()
+        for j in r.json().get("jobs", []):
+            if j.get("isListed") is False:
+                continue
+
+            # Combine primary + secondary locations so the location filter sees all of them
+            locations = [j.get("location") or ""]
+            locations += [s.get("location", "") for s in j.get("secondaryLocations") or []]
+            if j.get("isRemote") and not any("remote" in l.lower() for l in locations):
+                locations.append("Remote")
+
+            yield {
+                "id": f"ashby-{company}-{j['id']}",
+                "title": j["title"].strip(),
+                "company": company,
+                "location": " / ".join(l for l in locations if l),
+                "url": j["jobUrl"],
+                "description": j.get("descriptionPlain", ""),
+                "updated_at": j.get("publishedAt"),  # ISO format string
+            }
+    except Exception as e:
+        print(f"Ashby {company} failed: {e}")
 
 def fetch_rss(url):
     feed = feedparser.parse(url)
@@ -237,6 +292,7 @@ def run():
     sources = (
         [fetch_greenhouse(c) for c in GREENHOUSE_COMPANIES] +
         [fetch_lever(c)      for c in LEVER_COMPANIES] +
+        [fetch_ashby(c)      for c in ASHBY_COMPANIES] +
         [fetch_rss(u)        for u in RSS_FEEDS]
     )
 
